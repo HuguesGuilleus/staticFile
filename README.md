@@ -25,3 +25,4 @@ If the path is a directory, all files are imported.
 - `-dev`: enable dev mode
 - `-out.file`: The output go source file. (default "assets.go")
 - `-out.pkg`: The package of the source file. (default "main")
+- `-out.trim`: Remove prefix in the name function.

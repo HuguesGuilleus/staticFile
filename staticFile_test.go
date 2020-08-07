@@ -12,18 +12,24 @@ import (
 func TestGetName(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		in := "../front/app.js"
-		n, f := getName(in)
+		n, f := getName(in, "")
 		assert.Equal(t, "FrontApp", n, in, "name")
 		assert.Equal(t, in, f, "files")
 	})
 	t.Run("equal", func(t *testing.T) {
 		in := "xxx=../front/app.js"
-		n, f := getName(in)
+		n, f := getName(in, "")
 		assert.Equal(t, "xxx", n, in, "name")
 		assert.Equal(t, "../front/app.js", f, "files")
+	})
+	t.Run("trim", func(t *testing.T) {
+		in := "../front/app.js"
+		n, f := getName(in, "Front")
+		assert.Equal(t, "App", n, in, "name")
+		assert.Equal(t, in, f, "files")
 	})
 }
 
 func TestFname(t *testing.T) {
-	assert.Equal(t, "FrontApp", fname("../front/app.js"))
+	assert.Equal(t, "FrontApp", fname("../front/app.js", ""))
 }

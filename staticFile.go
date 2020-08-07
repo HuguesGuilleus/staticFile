@@ -23,6 +23,7 @@ var dev = false
 func main() {
 	outFile := flag.String("out.file", "assets.go", "The output go source file.")
 	outPkg := flag.String("out.pkg", "main", "The package of the source file.")
+	outTrim := flag.String("out.trim", "", "Trim prefix of output function name.")
 	flag.BoolVar(&dev, "dev", false, "dev mode, the file are read for each call.")
 	flag.Parse()
 
@@ -45,12 +46,12 @@ func main() {
 	if dev {
 		fmt.Fprintln(out, devImports)
 		for _, f := range flag.Args() {
-			n, f := getName(f)
+			n, f := getName(f, *outTrim)
 			fmt.Fprintf(out, "func %s() []byte {\n\troot := %q\n\t%s\n}\n\n", n, f, devReader)
 		}
 	} else {
 		for _, f := range flag.Args() {
-			n, f := getName(f)
+			n, f := getName(f, *outTrim)
 			log.Println("--", n)
 			fmt.Fprintf(out, "func %s() []byte { return []byte(%s) }\n\n", n, readFiles(f))
 		}
@@ -58,9 +59,9 @@ func main() {
 }
 
 // Return the files strources and the name of the future function.
-func getName(f string) (string, string) {
+func getName(f, outTrim string) (string, string) {
 	if !strings.Contains(f, "=") {
-		return fname(f), f
+		return fname(f, outTrim), f
 	}
 	s := strings.SplitN(f, "=", 2)
 	if s[0] == "" || s[1] == "" {
@@ -70,7 +71,7 @@ func getName(f string) (string, string) {
 }
 
 // Transform the file name to the function name associed.
-func fname(f string) string {
+func fname(f, outTrim string) string {
 	f = strings.TrimSuffix(f, filepath.Ext(f))
 	f = strings.TrimRight(f, string(os.PathSeparator))
 
@@ -80,7 +81,7 @@ func fname(f string) string {
 	for i := range split {
 		split[i] = firstUpper(split[i])
 	}
-	return strings.Join(split, "")
+	return strings.TrimPrefix(strings.Join(split, ""), outTrim)
 }
 
 // Transform the first rune to upper case.
